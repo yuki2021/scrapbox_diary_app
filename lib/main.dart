@@ -25,7 +25,7 @@ final controller = WebViewController()
       },
     ),
   )
-  ..loadRequest(Uri.parse('https://flutter.dev'));
+  ..loadRequest(Uri.parse('https://scrapbox.io/ordinaryplusmin-92374749/'));
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -41,8 +41,27 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Flutter Demo'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                // ボタンが押された時の動作をここに書きます
+              },
+            ),
+          ],
         ),
-        body: WebViewWidget(controller: controller),
+        body: WebViewWidget(
+          controller: controller,
+        ),
+        // フローティングアクションボタンを追加
+        floatingActionButton: FloatingActionButton(
+          // アイコンを設定
+          child: const Icon(Icons.add),
+          // クリック時の動作を設定
+          onPressed: () {
+            // ボタンが押された時の動作をここに書きます
+          },
+        ),
       ),
     );
   }
