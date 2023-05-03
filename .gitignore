@@ -50,3 +50,14 @@ lib/generated_plugin_registrant.dart
 
 # Exceptions to above rules.
 !**/ios/Flutter/ephemeral/.vmservice
+
+# macOS related
+**/macos/.DS_Store
+**/macos/Podfile.lock
+**/macos/Pods/
+**/macos/.symlinks/
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/.last_build_id
+**/macos/Flutter/Flutter.framework
+**/macos/Flutter/App.framework
+**/macos/Flutter/flutter_assets/
