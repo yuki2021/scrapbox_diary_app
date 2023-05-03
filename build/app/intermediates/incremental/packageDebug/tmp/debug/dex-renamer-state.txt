@@ -1,4 +1,0 @@
-#Tue May 02 20:20:47 JST 2023
-base.0=/Users/yuki2021/scrapbox_diary_app/scrapbox_diary_app/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
-renamed.0=classes.dex
-path.0=classes.dex
