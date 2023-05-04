@@ -42,7 +42,8 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.note_add),
             onPressed: () {
               if (webViewController != null) {
-                webViewController!.evaluateJavascript(source: setDiaryPageJavascriptSource());
+                webViewController!
+                    .evaluateJavascript(source: setDiaryPageJavascriptSource());
               }
             },
           ),
@@ -74,13 +75,19 @@ class _MyHomePageState extends State<MyHomePage> {
         onProgressChanged: (controller, progress) {
           // Code when the loading progress changes...
         },
+        shouldOverrideUrlLoading: (controller, navigationAction) async {
+          var url = navigationAction.request.url!;
+          print(url);
+          return NavigationActionPolicy.ALLOW;
+        },
         initialUrlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
           // JavaScriptで打刻をしたページを開く
-          webViewController!.evaluateJavascript(source: setTimeJavascriptSource());
+          webViewController!
+              .evaluateJavascript(source: setTimeJavascriptSource());
         },
       ),
     );
