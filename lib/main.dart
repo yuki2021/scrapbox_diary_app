@@ -1,34 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-// WebViewControllerを作成する
-final controller = WebViewController()
-  ..setJavaScriptMode(JavaScriptMode.unrestricted)
-  ..setBackgroundColor(const Color(0x00000000))
-  ..setNavigationDelegate(
-    NavigationDelegate(
-      onProgress: (int progress) {
-        // Update loading bar.
-      },
-      onPageStarted: (String url) {},
-      onPageFinished: (String url) {},
-      onWebResourceError: (WebResourceError error) {},
-      onNavigationRequest: (NavigationRequest request) {
-        if (request.url.startsWith('https://www.youtube.com/')) {
-          return NavigationDecision.prevent;
-        }
-        return NavigationDecision.navigate;
-      },
-    ),
-  )
-  ..loadRequest(Uri.parse('https://scrapbox.io/ordinaryplusmin-92374749/'));
-
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +15,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // Scaffoldを使って画面を作る
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Flutter Demo'),
@@ -50,14 +27,42 @@ class MyApp extends StatelessWidget {
             ),
           ],
         ),
-        body: WebViewWidget(
-          controller: controller,
+        body: InAppWebView(
+          initialOptions: InAppWebViewGroupOptions(
+            crossPlatform: InAppWebViewOptions(
+              javaScriptEnabled: true,
+              transparentBackground: true,
+            ),
+          ),
+          onWebViewCreated: (InAppWebViewController controller) {
+            controller.addJavaScriptHandler(
+              handlerName: 'onProgress',
+              callback: (args) {
+                // Update loading bar.
+              },
+            );
+            // Add other JavaScript handlers here...
+          },
+          onLoadStart: (controller, url) {
+            // Code when page starts loading...
+          },
+          onLoadStop: (controller, url) {
+            // Code when page finishes loading...
+          },
+          onLoadError: (controller, url, code, message) {
+            // Code when there's a resource error...
+          },
+          onLoadHttpError: (controller, url, statusCode, description) {
+            // Code when there's an HTTP error...
+          },
+          onProgressChanged: (controller, progress) {
+            // Code when the loading progress changes...
+          },
+          initialUrlRequest: URLRequest(
+              url: Uri.parse('https://scrapbox.io/ordinaryplusmin-92374749/')),
         ),
-        // フローティングアクションボタンを追加
         floatingActionButton: FloatingActionButton(
-          // アイコンを設定
           child: const Icon(Icons.add),
-          // クリック時の動作を設定
           onPressed: () {
             // ボタンが押された時の動作をここに書きます
           },
