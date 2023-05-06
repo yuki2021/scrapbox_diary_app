@@ -10,14 +10,53 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   InAppWebViewController? webViewController;
+
+  // ローディング判定
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // アプリがアクティブかどうかを監視する
+    WidgetsBinding.instance?.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    // アプリがアクティブかどうかを監視するのをやめる
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+  //　アプリがアクティブになった時にWebViewをリロードする
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && webViewController != null) {
+      webViewController?.reload();
+    }
+  }
+
+  // リロード処理
+  Future<void> _reloadWebView() async {
+    if (webViewController != null) {
+      webViewController?.reload();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: [
+          IconButton(
+            // リロードボタン
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _reloadWebView();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -49,38 +88,53 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: InAppWebView(
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(
-            javaScriptEnabled: true,
-            transparentBackground: true,
-            userAgent: AppConfig.userAgent,
+      body: Stack(
+        children: [
+          InAppWebView(
+            initialOptions: InAppWebViewGroupOptions(
+              crossPlatform: InAppWebViewOptions(
+                javaScriptEnabled: true,
+                transparentBackground: true,
+                userAgent: AppConfig.userAgent,
+              ),
+            ),
+            onWebViewCreated: (InAppWebViewController controller) {
+              webViewController = controller;
+            },
+            onLoadStart: (controller, url) {
+              // ローディング中はtrue
+              setState(() {
+                _isLoading = true;
+              });
+            },
+            onLoadStop: (controller, url) {
+              // ローディングが終わったらfalse
+              setState(() {
+                _isLoading = false;
+              });
+            },
+            onLoadError: (controller, url, code, message) {
+              // Code when there's a resource error...
+            },
+            onLoadHttpError: (controller, url, statusCode, description) {
+              // Code when there's an HTTP error...
+            },
+            onProgressChanged: (controller, progress) {
+              // Code when the loading progress changes...
+            },
+            shouldOverrideUrlLoading: (controller, navigationAction) async {
+              var url = navigationAction.request.url!;
+              print(url);
+              return NavigationActionPolicy.ALLOW;
+            },
+            initialUrlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)),
           ),
-        ),
-        onWebViewCreated: (InAppWebViewController controller) {
-          webViewController = controller;
-        },
-        onLoadStart: (controller, url) {
-          // Code when page starts loading...
-        },
-        onLoadStop: (controller, url) {
-          // Code when page finishes loading...
-        },
-        onLoadError: (controller, url, code, message) {
-          // Code when there's a resource error...
-        },
-        onLoadHttpError: (controller, url, statusCode, description) {
-          // Code when there's an HTTP error...
-        },
-        onProgressChanged: (controller, progress) {
-          // Code when the loading progress changes...
-        },
-        shouldOverrideUrlLoading: (controller, navigationAction) async {
-          var url = navigationAction.request.url!;
-          print(url);
-          return NavigationActionPolicy.ALLOW;
-        },
-        initialUrlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)),
+          // ローディング中はインジケーターを表示
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
