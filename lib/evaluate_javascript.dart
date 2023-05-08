@@ -1,3 +1,4 @@
+// 今日のDailyページを開く
 String setDiaryPageJavascriptSource() {
   return '''
     var diffDate = function (date, diffDays, diffMonths = 0, diffYears = 0) {
@@ -42,6 +43,7 @@ String setDiaryPageJavascriptSource() {
   ''';
 }
 
+// 今日の日付のページを打刻して開く
 String setTimeJavascriptSource() {
   return """
     var d = new Date();
@@ -62,5 +64,24 @@ String setTimeJavascriptSource() {
     var second = now.getSeconds();
     var body = encodeURIComponent('\\t' + date.join('/') + ' ' + hour + ':' + minute + ':' + second);
     window.open(scrapboxUrl + '?body=' + body);
+    """;
+}
+
+// 今日のページを開く
+String openTodayPageJavascriptSource() {
+  return """
+    var d = new Date();
+    var year = d.getFullYear();
+    var dt = d.getDate();
+    var month = d.getMonth() + 1;
+    var date = [
+        year,
+        ('00' + month).slice(-2),
+        ('00' + dt).slice(-2)
+    ];
+    var title = date.join('/');
+    var scrapboxProject = location.href.match(/scrapbox.io\\/([^\\/.]*)/)[1];
+    var scrapboxUrl = 'https://scrapbox.io/' + scrapboxProject + '/' + encodeURIComponent(title);
+    window.open(scrapboxUrl);
     """;
 }

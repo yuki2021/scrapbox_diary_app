@@ -16,11 +16,26 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   // ローディング判定
   bool _isLoading = true;
 
+  // プルトゥリフレッシュのコントローラー
+  late PullToRefreshController pullToRefreshController;
+
   @override
   void initState() {
     super.initState();
     // アプリがアクティブかどうかを監視する
     WidgetsBinding.instance?.addObserver(this);
+    // プルトゥリフレッシュのコントローラーを初期化
+    pullToRefreshController = PullToRefreshController(
+      options: PullToRefreshOptions(
+        color: Colors.blue,
+      ),
+      onRefresh: () async {
+        if (webViewController != null) {
+          webViewController?.reload();
+          pullToRefreshController.endRefreshing();
+        }
+      },
+    );
   }
 
   @override
@@ -51,10 +66,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       appBar: AppBar(
         actions: [
           IconButton(
-            // リロードボタン
-            icon: const Icon(Icons.refresh),
+            // その日のページに移動する
+            icon: const Icon(Icons.calendar_today),
             onPressed: () {
-              _reloadWebView();
+              if (webViewController != null) {
+                webViewController!
+                    .evaluateJavascript(source: openTodayPageJavascriptSource());
+              }
             },
           ),
           IconButton(
@@ -98,6 +116,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 userAgent: AppConfig.userAgent,
               ),
             ),
+            pullToRefreshController: pullToRefreshController,
             onWebViewCreated: (InAppWebViewController controller) {
               webViewController = controller;
             },
