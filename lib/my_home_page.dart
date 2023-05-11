@@ -47,16 +47,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   //　アプリがアクティブになった時にWebViewをリロードする
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed && webViewController != null) {
-      webViewController?.reload();
-    }
-  }
-
-  // リロード処理
-  Future<void> _reloadWebView() async {
-    if (webViewController != null) {
-      webViewController?.reload();
+      // URLがhttps://scrapbox.io/で始まる時にリロードする
+      final url = await webViewController?.getUrl();
+      if (url != null && url.toString().startsWith(AppConfig.initialUrl)) {
+        webViewController?.reload();
+      }
     }
   }
 
@@ -70,8 +67,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             icon: const Icon(Icons.calendar_today),
             onPressed: () {
               if (webViewController != null) {
-                webViewController!
-                    .evaluateJavascript(source: openTodayPageJavascriptSource());
+                webViewController!.evaluateJavascript(
+                    source: openTodayPageJavascriptSource());
               }
             },
           ),
