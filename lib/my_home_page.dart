@@ -21,8 +21,6 @@ class MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObser
     super.initState();
     // アプリがアクティブかどうかを監視する
     WidgetsBinding.instance?.addObserver(this);
-    // webViewControllerを初期化
-    webViewController = ref.read(webViewControllerProvider);
   }
 
   @override
@@ -46,6 +44,8 @@ class MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObser
 
   @override
   Widget build(BuildContext context) {
+    // webViewControllerを取得する
+    webViewController = ref.watch(webViewControllerProvider);
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -94,9 +94,11 @@ class MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObser
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          // JavaScriptで打刻をしたページを開く
-          webViewController!
-              .evaluateJavascript(source: setTimeJavascriptSource());
+          if(webViewController != null) {
+            // JavaScriptで打刻をしたページを開く
+            webViewController!
+                .evaluateJavascript(source: setTimeJavascriptSource());
+          }
         },
       ),
     );

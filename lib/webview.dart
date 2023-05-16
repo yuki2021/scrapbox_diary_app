@@ -4,19 +4,27 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'config.dart';
 
+class WebViewControllerNotifier extends StateNotifier<InAppWebViewController?> {
+  WebViewControllerNotifier() : super(null);
+
+  void setController(InAppWebViewController? controller) {
+    state = controller;
+  }
+}
+
 final webViewControllerProvider =
-    StateProvider<InAppWebViewController?>((ref) => null);
+    StateNotifierProvider<WebViewControllerNotifier, InAppWebViewController?>(
+        (ref) => WebViewControllerNotifier());
 
 class ShowWebView extends StatefulHookConsumerWidget {
-  const ShowWebView({super.key});
+  const ShowWebView({Key? key}) : super(key: key);
 
   @override
   ShowWebViewState createState() => ShowWebViewState();
 }
 
 class ShowWebViewState extends ConsumerState<ShowWebView> {
-
-  InAppWebViewController? webViewController;
+  // ローディング中かどうか
   bool _isLoading = true;
 
   // プルトゥリフレッシュのコントローラー
@@ -32,8 +40,10 @@ class ShowWebViewState extends ConsumerState<ShowWebView> {
         color: Colors.blue,
       ),
       onRefresh: () async {
+        final webViewController =
+            ref.read(webViewControllerProvider);
         if (webViewController != null) {
-          webViewController?.reload();
+          webViewController.reload();
           pullToRefreshController.endRefreshing();
         }
       },
@@ -42,7 +52,6 @@ class ShowWebViewState extends ConsumerState<ShowWebView> {
 
   @override
   Widget build(BuildContext context) {
-    final webViewControllerState = ref.watch(webViewControllerProvider);
     return Stack(
       children: [
         InAppWebView(
@@ -55,8 +64,9 @@ class ShowWebViewState extends ConsumerState<ShowWebView> {
           ),
           pullToRefreshController: pullToRefreshController,
           onWebViewCreated: (InAppWebViewController controller) {
-            webViewController = controller;
-            ref.read(webViewControllerProvider.notifier).state = controller;
+            ref
+                .read(webViewControllerProvider.notifier)
+                .setController(controller);
           },
           onLoadStart: (controller, url) {
             // ローディング中はtrue
@@ -81,7 +91,6 @@ class ShowWebViewState extends ConsumerState<ShowWebView> {
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
             var url = navigationAction.request.url!;
-            print(url);
             return NavigationActionPolicy.ALLOW;
           },
           initialUrlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)),
