@@ -1,32 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scrapbox_diary_app/provider/loading_state_provider.dart';
+import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 
-import 'config.dart';
+import '../config/config.dart';
 
-class WebViewControllerNotifier extends StateNotifier<InAppWebViewController?> {
-  WebViewControllerNotifier() : super(null);
-
-  void setController(InAppWebViewController? controller) {
-    state = controller;
-  }
-}
-
-final webViewControllerProvider =
-    StateNotifierProvider<WebViewControllerNotifier, InAppWebViewController?>(
-        (ref) => WebViewControllerNotifier());
-
-class ShowWebView extends StatefulHookConsumerWidget {
-  const ShowWebView({Key? key}) : super(key: key);
+class ShowScrapboxWebView extends StatefulHookConsumerWidget {
+  const ShowScrapboxWebView({Key? key}) : super(key: key);
 
   @override
-  ShowWebViewState createState() => ShowWebViewState();
+  ShowScrapboxWebViewState createState() => ShowScrapboxWebViewState();
 }
 
-class ShowWebViewState extends ConsumerState<ShowWebView> {
-  // ローディング中かどうか
-  bool _isLoading = true;
-
+class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
   // プルトゥリフレッシュのコントローラー
   late PullToRefreshController pullToRefreshController;
 
@@ -40,8 +27,7 @@ class ShowWebViewState extends ConsumerState<ShowWebView> {
         color: Colors.blue,
       ),
       onRefresh: () async {
-        final webViewController =
-            ref.read(webViewControllerProvider);
+        final webViewController = ref.read(webViewControllerProvider);
         if (webViewController != null) {
           webViewController.reload();
           pullToRefreshController.endRefreshing();
@@ -52,6 +38,9 @@ class ShowWebViewState extends ConsumerState<ShowWebView> {
 
   @override
   Widget build(BuildContext context) {
+    // ローディング中かどうか監視する
+    final isLoding = ref.watch(loadingStateProvider);
+
     return Stack(
       children: [
         InAppWebView(
@@ -70,33 +59,30 @@ class ShowWebViewState extends ConsumerState<ShowWebView> {
           },
           onLoadStart: (controller, url) {
             // ローディング中はtrue
-            setState(() {
-              _isLoading = true;
-            });
+            ref.read(loadingStateProvider.notifier).setLoading(true);
           },
           onLoadStop: (controller, url) {
             // ローディングが終わったらfalse
-            setState(() {
-              _isLoading = false;
-            });
+            ref.read(loadingStateProvider.notifier).setLoading(false);
           },
           onLoadError: (controller, url, code, message) {
-            // Code when there's a resource error...
+            // エラーが発生した場合でも、ローディングインジケーターを非表示にする
+            ref.read(loadingStateProvider.notifier).setLoading(false);
           },
           onLoadHttpError: (controller, url, statusCode, description) {
-            // Code when there's an HTTP error...
+            // HTTPエラーが発生した場合でも、ローディングインジケーターを非表示にする
+            ref.read(loadingStateProvider.notifier).setLoading(false);
           },
           onProgressChanged: (controller, progress) {
             // Code when the loading progress changes...
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
-            var url = navigationAction.request.url!;
             return NavigationActionPolicy.ALLOW;
           },
           initialUrlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)),
         ),
         // ローディング中はインジケーターを表示
-        if (_isLoading)
+        if (isLoding)
           const Center(
             child: CircularProgressIndicator(),
           ),

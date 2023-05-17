@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scrapbox_diary_app/config.dart';
-import 'package:scrapbox_diary_app/evaluate_javascript.dart';
-import 'package:scrapbox_diary_app/webview.dart';
+import 'package:scrapbox_diary_app/config/config.dart';
+import 'package:scrapbox_diary_app/scrapbox_utils/evaluate_javascript.dart';
+import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
+import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
+import 'package:scrapbox_diary_app/scrapbox_utils/timestamp_service.dart';
 
 class MyHomePage extends StatefulHookConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -12,21 +14,21 @@ class MyHomePage extends StatefulHookConsumerWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-class MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObserver {
-
+class MyHomePageState extends ConsumerState<MyHomePage>
+    with WidgetsBindingObserver {
   late InAppWebViewController? webViewController;
 
   @override
   void initState() {
     super.initState();
     // アプリがアクティブかどうかを監視する
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     // アプリがアクティブかどうかを監視するのをやめる
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -90,14 +92,19 @@ class MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObser
           ),
         ],
       ),
-      body: const ShowWebView(),
+      body: const ShowScrapboxWebView(),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () {
-          if(webViewController != null) {
-            // JavaScriptで打刻をしたページを開く
-            webViewController!
-                .evaluateJavascript(source: setTimeJavascriptSource());
+        onPressed: () async {
+          if (webViewController != null) {
+            // TimestampServiceを使ってScrapboxのURLを取得
+            final timestampService = ref.read(timestampServiceProvider);
+            final currentUrl = (await webViewController!.getUrl())?.toString() ?? '';
+            final now = DateTime.now();
+            final scrapboxUrl = await timestampService.getScrapboxUrl(currentUrl, now);
+
+            // ScrapboxのURLを開く
+            webViewController!.loadUrl(urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
           }
         },
       ),
