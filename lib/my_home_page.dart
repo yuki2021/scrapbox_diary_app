@@ -5,7 +5,7 @@ import 'package:scrapbox_diary_app/config/config.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/evaluate_javascript.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
-import 'package:scrapbox_diary_app/scrapbox_utils/timestamp_service.dart';
+import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
 
 class MyHomePage extends StatefulHookConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -83,10 +83,14 @@ class MyHomePageState extends ConsumerState<MyHomePage>
           ),
           IconButton(
             icon: const Icon(Icons.note_add),
-            onPressed: () {
+            onPressed: () async {
               if (webViewController != null) {
-                webViewController!
-                    .evaluateJavascript(source: setDiaryPageJavascriptSource());
+                
+                final currentUrl =
+                    (await webViewController!.getUrl())?.toString() ?? '';
+                final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
+                final diaryUrl = await setDiaryPage.setDiaryPage();
+                webViewController!.loadUrl(urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
               }
             },
           ),
@@ -98,10 +102,9 @@ class MyHomePageState extends ConsumerState<MyHomePage>
         onPressed: () async {
           if (webViewController != null) {
             // TimestampServiceを使ってScrapboxのURLを取得
-            final timestampService = ref.read(timestampServiceProvider);
             final currentUrl = (await webViewController!.getUrl())?.toString() ?? '';
-            final now = DateTime.now();
-            final scrapboxUrl = await timestampService.getScrapboxUrl(currentUrl, now);
+            final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
+            final scrapboxUrl = await setDiaryPage.getScrapboxUrl();
 
             // ScrapboxのURLを開く
             webViewController!.loadUrl(urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
