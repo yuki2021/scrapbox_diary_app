@@ -64,6 +64,7 @@ class MyHomePageState extends ConsumerState<MyHomePage>
           IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
+              // 戻れる時に戻る
               if (webViewController != null) {
                 if (await webViewController!.canGoBack()) {
                   webViewController!.goBack();
@@ -74,6 +75,7 @@ class MyHomePageState extends ConsumerState<MyHomePage>
           IconButton(
             icon: const Icon(Icons.arrow_forward),
             onPressed: () async {
+              // 進むことができる時だけ進む
               if (webViewController != null) {
                 if (await webViewController!.canGoForward()) {
                   webViewController!.goForward();
@@ -85,12 +87,12 @@ class MyHomePageState extends ConsumerState<MyHomePage>
             icon: const Icon(Icons.note_add),
             onPressed: () async {
               if (webViewController != null) {
-                
                 final currentUrl =
                     (await webViewController!.getUrl())?.toString() ?? '';
                 final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
                 final diaryUrl = await setDiaryPage.setDiaryPage();
-                webViewController!.loadUrl(urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
+                webViewController!
+                    .loadUrl(urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
               }
             },
           ),
@@ -101,13 +103,15 @@ class MyHomePageState extends ConsumerState<MyHomePage>
         child: const Icon(Icons.add),
         onPressed: () async {
           if (webViewController != null) {
-            // TimestampServiceを使ってScrapboxのURLを取得
-            final currentUrl = (await webViewController!.getUrl())?.toString() ?? '';
+            // SetDiaryPageを使ってScrapboxのURLを取得
+            final currentUrl =
+                (await webViewController!.getUrl())?.toString() ?? '';
             final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-            final scrapboxUrl = await setDiaryPage.getScrapboxUrl();
+            final scrapboxUrl = await setDiaryPage.setNowTimePage();
 
             // ScrapboxのURLを開く
-            webViewController!.loadUrl(urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
+            webViewController!
+                .loadUrl(urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
           }
         },
       ),

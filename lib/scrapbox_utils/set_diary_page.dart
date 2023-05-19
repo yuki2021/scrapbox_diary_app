@@ -1,15 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 
 final setDiaryPageProvider = Provider.family<SetDiaryPage, String>(
-    (ref, currentUrl) => SetDiaryPage(currentUrl));
+    (ref, currentUrl) => SetDiaryPage(ref, currentUrl));
 
 class SetDiaryPage {
+  final ProviderRef ref;
   final String _scrapboxProject;
   final List<String> days = ["日", "月", "火", "水", "木", "金", "土"];
 
-  SetDiaryPage(String currentUrl)
+  SetDiaryPage(this.ref, String currentUrl)
       : _scrapboxProject =
             (RegExp(r"scrapbox\.io/([^/.]*)").firstMatch(currentUrl)?[1]) ?? '';
 
@@ -56,7 +58,7 @@ class SetDiaryPage {
   }
 
   // その日の日付を打刻して開く
-  Future<String> getScrapboxUrl() async {
+  Future<String> setNowTimePage() async {
     final now = DateTime.now();
     final date = _formatDate(now);
     final title = Uri.encodeComponent(date);
@@ -69,16 +71,51 @@ class SetDiaryPage {
   }
 
   // その日の日付のページが存在するかどうか
+  // TODO: この関数は動作しない。denoの方の処理を確認して代替案を検討する
   Future<bool> pageExists(String title) async {
-    final response = await http.get(Uri.parse(
-        'https://scrapbox.io/api/pages/$_scrapboxProject/${Uri.encodeComponent(title)}'));
+    try {
+      // webViewContrllerを取得
+      final webViewController = ref.watch(webViewControllerProvider);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final url =
+          'https://scrapbox.io/api/pages/$_scrapboxProject/${Uri.encodeComponent(title)}';
+
+      if (webViewController == null) return false;
+      // Javascriptのfetch APIを用いてHTTPリクエストを送り、レスポンスを取得する
+      final result = await webViewController.evaluateJavascript(source: """
+    (async () => {
+        try {
+            const response = await fetch('${url.toString()}');
+            const data = await response.json();
+            return JSON.stringify(data);
+        } catch (error) {
+            return JSON.stringify({ error: error.message });
+        }
+    })()
+""") ?? '{}'; 
+
+      final data = jsonDecode(result);
+      if (data.containsKey('error')) {
+        print('JavaScript error: ${data['error']}');
+        return false;
+      }
       return data['descriptions'] != null &&
           (data['descriptions'] as List).isNotEmpty;
+    } catch (e) {
+      // Exception handling. You may want to handle different types of exceptions differently.
+      print(e);
+      return false;
+    }
+  }
+
+  // その日の日付のタイトルを作成し、ページが存在するか確認する
+  Future<String> getTodayPageUrl() async {
+    final todayTitle = _formatDate(DateTime.now());
+
+    if (await pageExists(todayTitle)) {
+      return setNowTimePage();
     } else {
-      throw Exception('Failed to load page');
+      return setDiaryPage();
     }
   }
 }
