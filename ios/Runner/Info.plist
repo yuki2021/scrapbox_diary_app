@@ -47,5 +47,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>このアプリではScrapboxに撮影した画像を投稿するためにカメラを使用します</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>このアプリではScrapboxに投稿するために写真を使用します</string>
 </dict>
 </plist>
