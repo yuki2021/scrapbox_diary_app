@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/provider/loading_state_provider.dart';
+import 'package:scrapbox_diary_app/provider/page_reload_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 
 import '../config/config.dart';
@@ -74,7 +75,12 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
             ref.read(loadingStateProvider.notifier).setLoading(false);
           },
           onProgressChanged: (controller, progress) {
-            // Code when the loading progress changes...
+            // 完全にページが読み込まれたらリロードフラグをtrueにする
+            if (progress == 100) {
+              ref.read(pageReloadStateProvider.notifier).setReloadFlg(true);
+            } else {
+              ref.read(pageReloadStateProvider.notifier).setReloadFlg(false);
+            }
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
             return NavigationActionPolicy.ALLOW;

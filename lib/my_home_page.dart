@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/config/config.dart';
+import 'package:scrapbox_diary_app/provider/page_reload_state_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/evaluate_javascript.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
@@ -35,13 +36,34 @@ class MyHomePageState extends ConsumerState<MyHomePage>
   //　アプリがアクティブになった時にWebViewをリロードする
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.resumed && webViewController != null) {
-      // URLがhttps://scrapbox.io/で始まる時にリロードする
-      final url = await webViewController?.getUrl();
-      if (url != null && url.toString().startsWith(AppConfig.initialUrl)) {
-        webViewController?.reload();
-      }
+    // アプリがアクティブになった時
+    if (state != AppLifecycleState.resumed) {
+      return;
     }
+
+    // webViewControllerがnullの時は何もしない
+    if (webViewController == null) {
+      return;
+    }
+
+    // リロードフラグがtrueの時は何もしない
+    final reloadFlag = ref.read(pageReloadStateProvider);
+
+    if (reloadFlag) {
+      return;
+    }
+
+    // URLがhttps://scrapbox.io/で始まる時にリロードする
+    final url = await webViewController?.getUrl();
+
+    if (url == null) {
+      return;
+    }
+    if (!url.toString().startsWith(AppConfig.initialUrl)) {
+      return;
+    }
+
+    webViewController?.reload();
   }
 
   @override
