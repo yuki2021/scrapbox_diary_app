@@ -70,6 +70,15 @@ class SetDiaryPage {
     return scrapboxUrl;
   }
 
+  // データピッカーから渡された日付のページのURLを生成する
+  Future<String> setDatePickerPage(DateTime dateObj) async {
+    final title = _formatDate(dateObj);
+    final scrapboxUrl =
+        'https://scrapbox.io/$_scrapboxProject/${Uri.encodeComponent(title)}';
+
+    return scrapboxUrl;
+  }
+
   // その日の日付のページが存在するかどうか
   // TODO: この関数は動作しない。denoの方の処理を確認して代替案を検討する
   Future<bool> pageExists(String title) async {

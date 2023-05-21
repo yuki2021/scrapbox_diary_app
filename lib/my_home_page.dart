@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/config/config.dart';
+import 'package:scrapbox_diary_app/provider/date_picker_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/page_reload_state_provider.dart';
-import 'package:scrapbox_diary_app/scrapbox_utils/evaluate_javascript.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 class MyHomePage extends StatefulHookConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -70,16 +71,32 @@ class MyHomePageState extends ConsumerState<MyHomePage>
   Widget build(BuildContext context) {
     // webViewControllerを取得する
     webViewController = ref.watch(webViewControllerProvider);
+
+    // 日付が変わった時にWebViewをリロードする
+    useEffect(() {
+      if(webViewController == null) return;
+      // useEffectの中でasync関数を使うために必要
+      Future<void> fetchAsyncData() async {
+        final selectedDate = ref.watch(datePickerProvider);
+        final currentUrl = (await webViewController!.getUrl()).toString();
+        final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
+        final diaryUrl = await setDiaryPage.setDatePickerPage(selectedDate);
+        webViewController!
+             .loadUrl(urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
+     }
+      fetchAsyncData();
+      return;
+    }, [ref.watch(datePickerProvider)]);
+
     return Scaffold(
       appBar: AppBar(
         actions: [
           IconButton(
-            // その日のページに移動する
+            // データピッカーを開いて日付を選択する
             icon: const Icon(Icons.calendar_today),
             onPressed: () {
               if (webViewController != null) {
-                webViewController!.evaluateJavascript(
-                    source: openTodayPageJavascriptSource());
+                ref.read(datePickerProvider.notifier).pickDate(context);
               }
             },
           ),
