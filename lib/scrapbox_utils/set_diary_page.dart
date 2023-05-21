@@ -9,7 +9,7 @@ final setDiaryPageProvider = Provider.family<SetDiaryPage, String>(
 class SetDiaryPage {
   final ProviderRef ref;
   final String _scrapboxProject;
-  final List<String> days = ["日", "月", "火", "水", "木", "金", "土"];
+  final List<String> days = ["月", "火", "水", "木", "金", "土", "日"];
 
   SetDiaryPage(this.ref, String currentUrl)
       : _scrapboxProject =
@@ -44,7 +44,7 @@ class SetDiaryPage {
       _generateTag('←', d, diffDays: -1),
       '#${d.year}',
       '#${d.month}月',
-      '#${days[d.weekday]}曜日',
+      '#${days[d.weekday -1]}曜日',
       _generateTag('1ヶ月前', d, diffMonths: -1),
       _generateTag('3ヶ月前', d, diffMonths: -3),
       _generateTag('1年前', d, diffYears: -1),
