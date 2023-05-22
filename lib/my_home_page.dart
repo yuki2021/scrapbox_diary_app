@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/config/config.dart';
 import 'package:scrapbox_diary_app/provider/date_picker_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/page_reload_state_provider.dart';
+import 'package:scrapbox_diary_app/provider/speed_dial_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
@@ -75,7 +76,7 @@ class MyHomePageState extends ConsumerState<MyHomePage>
 
     // 日付が変わった時にWebViewをリロードする
     useEffect(() {
-      if(webViewController == null) return;
+      if (webViewController == null) return;
       // useEffectの中でasync関数を使うために必要
       Future<void> fetchAsyncData() async {
         final selectedDate = ref.watch(datePickerProvider);
@@ -83,8 +84,9 @@ class MyHomePageState extends ConsumerState<MyHomePage>
         final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
         final diaryUrl = await setDiaryPage.setDatePickerPage(selectedDate);
         webViewController!
-             .loadUrl(urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
-     }
+            .loadUrl(urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
+      }
+
       fetchAsyncData();
       return;
     }, [ref.watch(datePickerProvider)]);
@@ -123,39 +125,13 @@ class MyHomePageState extends ConsumerState<MyHomePage>
               }
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.note_add),
-            onPressed: () async {
-              if (webViewController != null) {
-                final currentUrl =
-                    (await webViewController!.getUrl())?.toString() ?? '';
-                final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-                final diaryUrl = await setDiaryPage.setDiaryPage();
-                webViewController!
-                    .loadUrl(urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
-              }
-            },
-          ),
         ],
       ),
       body: const ShowScrapboxWebView(),
-      // floatingActionButton: FloatingActionButton(
-      //   child: const Icon(Icons.add),
-      //   onPressed: () async {
-      //     if (webViewController != null) {
-      //       // SetDiaryPageを使ってScrapboxのURLを取得
-      //       final currentUrl =
-      //           (await webViewController!.getUrl())?.toString() ?? '';
-      //       final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-      //       final scrapboxUrl = await setDiaryPage.setNowTimePage();
-
-      //       // ScrapboxのURLを開く
-      //       webViewController!
-      //           .loadUrl(urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
-      //     }
-      //   },
-      // ),
-      floatingActionButton: buildSpeedDial(),
+      // キーボードが開いてる時はFABを表示しない
+      floatingActionButton: MediaQuery.of(context).viewInsets.bottom == 0
+          ? ref.read(speedDialProvider)
+          : null,
     );
   }
 }
