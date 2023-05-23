@@ -9,7 +9,7 @@ class SpeedDialState extends ConsumerWidget {
   final ProviderRef ref;
 
   const SpeedDialState(this.ref, {super.key});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // webViewControllerを取得
@@ -23,16 +23,16 @@ class SpeedDialState extends ConsumerWidget {
           label: '入力',
           onTap: () async {
             if (webViewController != null) {
-            // SetDiaryPageを使ってScrapboxのURLを取得
-            final currentUrl =
-                (await webViewController.getUrl())?.toString() ?? '';
-            final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-            final scrapboxUrl = await setDiaryPage.setNowTimePage();
+              // SetDiaryPageを使ってScrapboxのURLを取得
+              final currentUrl =
+                  (await webViewController.getUrl())?.toString() ?? '';
+              final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
+              final scrapboxUrl = await setDiaryPage.setNowTimePage();
 
-            // ScrapboxのURLを開く
-            webViewController
-                .loadUrl(urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
-          }
+              // ScrapboxのURLを開く
+              webViewController.loadUrl(
+                  urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
+            }
           },
         ),
         SpeedDialChild(
@@ -44,8 +44,8 @@ class SpeedDialState extends ConsumerWidget {
                   (await webViewController.getUrl())?.toString() ?? '';
               final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
               final diaryUrl = await setDiaryPage.setDiaryPage();
-              webViewController!
-                  .loadUrl(urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
+              webViewController.loadUrl(
+                  urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
             }
           },
         ),
@@ -54,11 +54,11 @@ class SpeedDialState extends ConsumerWidget {
           label: 'JavaScript',
           onTap: () async {
             if (webViewController != null) {
-              await webViewController.evaluateJavascript(source: '''
-                if (typeof test_scrap_diary === "function") {
-                  test_scrap_diary();
-                }
-              ''');
+              final currentUrl =
+                  (await webViewController.getUrl())?.toString() ?? '';
+              final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
+              final diaryUrl = await setDiaryPage.pageExists('2023/05/24');
+              print(diaryUrl);
             }
           },
         ),

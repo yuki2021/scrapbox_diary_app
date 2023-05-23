@@ -9,7 +9,6 @@ import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:scrapbox_diary_app/widget/speed_dial_widget.dart';
 
 class MyHomePage extends StatefulHookConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -44,7 +45,7 @@ class SetDiaryPage {
       _generateTag('←', d, diffDays: -1),
       '#${d.year}',
       '#${d.month}月',
-      '#${days[d.weekday -1]}曜日',
+      '#${days[d.weekday - 1]}曜日',
       _generateTag('1ヶ月前', d, diffMonths: -1),
       _generateTag('3ヶ月前', d, diffMonths: -3),
       _generateTag('1年前', d, diffYears: -1),
@@ -80,7 +81,6 @@ class SetDiaryPage {
   }
 
   // その日の日付のページが存在するかどうか
-  // TODO: この関数は動作しない。denoの方の処理を確認して代替案を検討する
   Future<bool> pageExists(String title) async {
     try {
       // webViewContrllerを取得
@@ -90,28 +90,44 @@ class SetDiaryPage {
           'https://scrapbox.io/api/pages/$_scrapboxProject/${Uri.encodeComponent(title)}';
 
       if (webViewController == null) return false;
-      // Javascriptのfetch APIを用いてHTTPリクエストを送り、レスポンスを取得する
-      final result = await webViewController.evaluateJavascript(source: """
-    (async () => {
-        try {
-            const response = await fetch('${url.toString()}');
-            const data = await response.json();
-            return JSON.stringify(data);
-        } catch (error) {
-            return JSON.stringify({ error: error.message });
-        }
-    })()
-""") ?? '{}'; 
 
-      final data = jsonDecode(result);
-      if (data.containsKey('error')) {
-        print('JavaScript error: ${data['error']}');
-        return false;
-      }
-      return data['descriptions'] != null &&
-          (data['descriptions'] as List).isNotEmpty;
+      // Completerの作成
+      final completer = Completer<bool>();
+
+      // JavaScriptハンドラの追加
+      webViewController.addJavaScriptHandler(
+        handlerName: 'myHandler',
+        callback: (args) {
+          // 受け取ったデータを解析
+          final result = args[0] as String;
+          final data = jsonDecode(result);
+
+          if (data.containsKey('error')) {
+            print('JavaScript error: ${data['error']}');
+            completer.complete(false);
+          } else {
+            completer.complete(data['descriptions'] != null &&
+                (data['descriptions'] as List).isNotEmpty);
+          }
+        },
+      );
+
+      // JavaScriptの非同期処理の開始
+      webViewController.evaluateJavascript(source: """
+        (async () => {
+            try {
+                const response = await fetch(`$url`);
+                const data = await response.json();
+                window.flutter_inappwebview.callHandler('myHandler', JSON.stringify(data));
+            } catch (error) {
+                window.flutter_inappwebview.callHandler('myHandler', JSON.stringify({ error: error.message }));
+            }
+        })()
+      """);
+
+      // 結果が戻るまで待つ
+      return completer.future;
     } catch (e) {
-      // Exception handling. You may want to handle different types of exceptions differently.
       print(e);
       return false;
     }
