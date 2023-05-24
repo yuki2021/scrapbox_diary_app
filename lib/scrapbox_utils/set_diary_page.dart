@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scrapbox_diary_app/config/logger.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 
 final setDiaryPageProvider = Provider.family<SetDiaryPage, String>(
@@ -103,7 +103,7 @@ class SetDiaryPage {
           final data = jsonDecode(result);
 
           if (data.containsKey('error')) {
-            print('JavaScript error: ${data['error']}');
+            logger.e('JavaScript error: ${data['error']}');
             completer.complete(false);
           } else {
             completer.complete(data['descriptions'] != null &&
@@ -128,7 +128,7 @@ class SetDiaryPage {
       // 結果が戻るまで待つ
       return completer.future;
     } catch (e) {
-      print(e);
+      logger.e(e);
       return false;
     }
   }

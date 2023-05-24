@@ -27,38 +27,11 @@ class SpeedDialState extends ConsumerWidget {
               final currentUrl =
                   (await webViewController.getUrl())?.toString() ?? '';
               final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-              final scrapboxUrl = await setDiaryPage.setNowTimePage();
+              final scrapboxUrl = await setDiaryPage.getTodayPageUrl();
 
               // ScrapboxのURLを開く
               webViewController.loadUrl(
                   urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
-            }
-          },
-        ),
-        SpeedDialChild(
-          child: const Icon(Icons.note_add),
-          label: '日記を追加',
-          onTap: () async {
-            if (webViewController != null) {
-              final currentUrl =
-                  (await webViewController.getUrl())?.toString() ?? '';
-              final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-              final diaryUrl = await setDiaryPage.setDiaryPage();
-              webViewController.loadUrl(
-                  urlRequest: URLRequest(url: Uri.parse(diaryUrl)));
-            }
-          },
-        ),
-        SpeedDialChild(
-          child: const Icon(Icons.note_add),
-          label: 'JavaScript',
-          onTap: () async {
-            if (webViewController != null) {
-              final currentUrl =
-                  (await webViewController.getUrl())?.toString() ?? '';
-              final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-              final diaryUrl = await setDiaryPage.pageExists('2023/05/24');
-              print(diaryUrl);
             }
           },
         ),
