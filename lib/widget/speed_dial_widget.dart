@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scrapbox_diary_app/google_auth_page.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
 
@@ -33,6 +34,14 @@ class SpeedDialState extends ConsumerWidget {
               webViewController.loadUrl(
                   urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
             }
+          },
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.add),
+          label: 'Google認証',
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const GoogleAuthPage()));
           },
         ),
       ],

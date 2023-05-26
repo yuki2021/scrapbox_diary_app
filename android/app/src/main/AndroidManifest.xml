@@ -2,8 +2,8 @@
     package="com.example.scrapbox_diary_app">
    <application
         android:label="scrapbox_diary_app"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:name="androidx.multidex.MultiDexApplication">
         <activity
             android:name=".MainActivity"
             android:exported="true"
