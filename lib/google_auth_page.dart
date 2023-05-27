@@ -22,7 +22,7 @@ class GoogleAuthPageState extends State<GoogleAuthPage> {
     return Scaffold(
         body: Center(
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text("Hello $_displayName", style: TextStyle(fontSize: 50)),
+        Text("Hello $_displayName", style: const TextStyle(fontSize: 50)),
         TextButton(
           // ボタンを押した時のイベント
           onPressed: () async {
@@ -48,7 +48,7 @@ class GoogleAuthPageState extends State<GoogleAuthPage> {
           },
           child: const Text(
             'login',
-            style: const TextStyle(fontSize: 50),
+            style: TextStyle(fontSize: 50),
           ),
         ),
       ]),

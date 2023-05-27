@@ -1,6 +1,9 @@
+import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scrapbox_diary_app/config/logger.dart';
 import 'package:scrapbox_diary_app/provider/loading_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/page_reload_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
@@ -17,6 +20,10 @@ class ShowScrapboxWebView extends StatefulHookConsumerWidget {
 class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
   // プルトゥリフレッシュのコントローラー
   late PullToRefreshController pullToRefreshController;
+
+  // ローディング中かどうか監視する
+  DateTime? lastLoadingUrlChange;
+  Timer? loadingTimeoutTimer;
 
   @override
   void initState() {
@@ -38,6 +45,13 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
   }
 
   @override
+  void dispose() {
+    // 画面終了時にタイマーをキャンセル
+    loadingTimeoutTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // ローディング中かどうか監視する
     final isLoding = ref.watch(loadingStateProvider);
@@ -49,7 +63,8 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
             crossPlatform: InAppWebViewOptions(
               javaScriptEnabled: true,
               transparentBackground: true,
-              userAgent: AppConfig.userAgent,
+              // iosとandroidでUAを変える
+              userAgent: Platform.isIOS ? AppConfig.iOSUserAgent : AppConfig.androidUserAgent,
             ),
           ),
           pullToRefreshController: pullToRefreshController,
@@ -59,20 +74,49 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
                 .setController(controller);
           },
           onLoadStart: (controller, url) {
+            logger.i('onLoadStart: $url');
+            // ScrapboxのリダイレクトのURLで5秒以上読み込みが終わらなければ力づくでScrapboxのログイン画面に遷移させる
+            if (url
+                .toString()
+                .contains('https://scrapbox.io/auth/google/callback')) {
+              lastLoadingUrlChange = DateTime.now();
+              loadingTimeoutTimer?.cancel();
+              loadingTimeoutTimer = Timer(const Duration(seconds: 5), () {
+                if (lastLoadingUrlChange != null &&
+                    DateTime.now()
+                            .difference(lastLoadingUrlChange!)
+                            .inSeconds >=
+                        5) {
+                  controller.loadUrl(
+                      urlRequest:
+                          URLRequest(url: Uri.parse('https://scrapbox.io/login/google')));
+                }
+              });
+            }
             // ローディング中はtrue
             ref.read(loadingStateProvider.notifier).setLoading(true);
           },
           onLoadStop: (controller, url) {
+            logger.i('onLoadStop: $url');
+            // ローディングが終わったらタイマーをキャンセル
+            lastLoadingUrlChange = null;
+            loadingTimeoutTimer?.cancel();
+            loadingTimeoutTimer = null;
             // ローディングが終わったらfalse
             ref.read(loadingStateProvider.notifier).setLoading(false);
           },
           onLoadError: (controller, url, code, message) {
+            logger.i('onLoadError: $url');
             // エラーが発生した場合でも、ローディングインジケーターを非表示にする
             ref.read(loadingStateProvider.notifier).setLoading(false);
           },
           onLoadHttpError: (controller, url, statusCode, description) {
+            logger.i('onLoadHttpError: $url');
             // HTTPエラーが発生した場合でも、ローディングインジケーターを非表示にする
             ref.read(loadingStateProvider.notifier).setLoading(false);
+          },
+          onConsoleMessage: (controller, consoleMessage) {
+            logger.i('onConsoleMessage: ${consoleMessage.message}');
           },
           onProgressChanged: (controller, progress) {
             // 完全にページが読み込まれたらリロードフラグをtrueにする
