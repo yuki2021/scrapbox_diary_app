@@ -35,6 +35,14 @@ class SpeedDialState extends ConsumerWidget {
             }
           },
         ),
+        // SpeedDialChild(
+        //   child: const Icon(Icons.add),
+        //   label: 'Google認証',
+        //   onTap: () {
+        //     Navigator.push(context,
+        //         MaterialPageRoute(builder: (context) => const GoogleAuthPage()));
+        //   },
+        // ),
       ],
     );
   }
