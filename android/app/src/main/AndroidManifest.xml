@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.scrapbox_diary_app">
+    package="net.yuki2021.scrapbox_diary">
    <application
         android:label="scrapbox_diary_app"
         android:icon="@mipmap/ic_launcher"
