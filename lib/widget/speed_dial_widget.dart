@@ -3,6 +3,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
+import 'package:scrapbox_diary_app/scrapbox_utils/location_service.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
 
 class SpeedDialState extends ConsumerWidget {
@@ -43,8 +44,8 @@ class SpeedDialState extends ConsumerWidget {
               // SetDiaryPageを使ってScrapboxのURLを取得
               final currentUrl =
                   (await webViewController.getUrl())?.toString() ?? '';
-              final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-              final scrapboxUrl = await setDiaryPage.getCurrentLocation();
+              final setLocation = ref.read(locationServiceProvider(currentUrl));
+              final scrapboxUrl = await setLocation.getCurrentLocation();
 
               // ScrapboxのURLを開く
               webViewController.loadUrl(
