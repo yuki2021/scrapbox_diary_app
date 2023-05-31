@@ -1,3 +1,4 @@
+import 'package:scrapbox_diary_app/config/config.dart';
 
 class DateUtils {
   DateUtils(this._scrapboxProject);
@@ -20,7 +21,7 @@ class DateUtils {
   // Tag生成
   String generateTag(String title, DateTime date,
       {int diffDays = 0, int diffMonths = 0, int diffYears = 0}) {
-    String projectUrl = 'https://scrapbox.io/$_scrapboxProject/';
+    String projectUrl = '${AppConfig.initialUrl}$_scrapboxProject/';
     return '[$title $projectUrl${Uri.encodeComponent(formatDate(diffDate(date, diffDays, diffMonths: diffMonths, diffYears: diffYears)))}]';
   }
 }

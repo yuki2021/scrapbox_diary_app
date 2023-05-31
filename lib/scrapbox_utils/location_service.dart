@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/common/date_utils.dart';
 import 'package:scrapbox_diary_app/config/logger.dart';
+import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_url.dart';
 
 final locationServiceProvider =
     Provider.family<LocationService, String>((ref, currentUrl) {
@@ -13,11 +14,13 @@ final locationServiceProvider =
 class LocationService {
   final String _scrapboxProject;
   late final DateUtils dateUtils;
+  late final ScrapboxUrlGenerator scrapboxUrlGenerator;
 
   LocationService(String currentUrl)
       : _scrapboxProject =
             (RegExp(r"scrapbox\.io/([^/.]*)").firstMatch(currentUrl)?[1]) ?? '' {
     dateUtils = DateUtils(_scrapboxProject);
+    scrapboxUrlGenerator = ScrapboxUrlGenerator(_scrapboxProject);
   }
 
   Future<String> getCurrentLocation() async {
@@ -45,12 +48,13 @@ class LocationService {
         // 現在時刻を取得
         final now = DateTime.now();
         final date = dateUtils.formatDate(now);
-        final title = Uri.encodeComponent(date);
         // 住所と現在時刻をページに追記
-        final body = Uri.encodeComponent(
-            '\t$date ${now.hour}:${now.minute}:${now.second}\n\t\t${placemarks.first.name}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}\n\t\t\t[Google Map https://www.google.com/maps/?q=${position.latitude},${position.longitude}]');
-        final scrapboxUrl =
-            'https://scrapbox.io/$_scrapboxProject/$title?body=$body';
+        final body = Uri.encodeComponent('''
+\t$date ${now.hour}:${now.minute}:${now.second}
+\t\t${placemarks.first.name}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}
+\t\t\t[Google Map https://www.google.com/maps/?q=${position.latitude},${position.longitude}]
+''');
+        final scrapboxUrl = '${scrapboxUrlGenerator.generatePageUrl(date)}?body=$body';
         return scrapboxUrl;
       } else {
         logger.i("No placemark associated with the location");

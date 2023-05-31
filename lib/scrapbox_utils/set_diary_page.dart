@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/common/date_utils.dart';
 import 'package:scrapbox_diary_app/config/logger.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
+import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_url.dart';
 
 final setDiaryPageProvider = Provider.family<SetDiaryPage, String>(
     (ref, currentUrl) => SetDiaryPage(ref, currentUrl));
@@ -13,12 +14,14 @@ class SetDiaryPage {
   final String _scrapboxProject;
   final List<String> days = ["月", "火", "水", "木", "金", "土", "日"];
   late final DateUtils dateUtils;
+  late final ScrapboxUrlGenerator scrapboxUrlGenerator;
 
   SetDiaryPage(this.ref, String currentUrl)
       : _scrapboxProject =
             (RegExp(r"scrapbox\.io/([^/.]*)").firstMatch(currentUrl)?[1]) ??
                 '' {
     dateUtils = DateUtils(_scrapboxProject);
+    scrapboxUrlGenerator = ScrapboxUrlGenerator(_scrapboxProject);
   }
 
   // 今日の日付のページを作成する
@@ -36,8 +39,7 @@ class SetDiaryPage {
       dateUtils.generateTag('→', d, diffDays: 1),
     ];
     String body = Uri.encodeComponent(tags.join(' '));
-    String scrapboxUrl =
-        'https://scrapbox.io/$_scrapboxProject/${Uri.encodeComponent(title)}';
+    String scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(title);
 
     return '$scrapboxUrl?body=$body';
   }
@@ -46,11 +48,9 @@ class SetDiaryPage {
   Future<String> setNowTimePage() async {
     final now = DateTime.now();
     final date = dateUtils.formatDate(now);
-    final title = Uri.encodeComponent(date);
     final body =
         Uri.encodeComponent('\t$date ${now.hour}:${now.minute}:${now.second}');
-    final scrapboxUrl =
-        'https://scrapbox.io/$_scrapboxProject/$title?body=$body';
+    final scrapboxUrl = '${scrapboxUrlGenerator.generatePageUrl(date)}?body=$body';
 
     return scrapboxUrl;
   }
@@ -58,8 +58,7 @@ class SetDiaryPage {
   // データピッカーから渡された日付のページのURLを生成する
   Future<String> setDatePickerPage(DateTime dateObj) async {
     final title = dateUtils.formatDate(dateObj);
-    final scrapboxUrl =
-        'https://scrapbox.io/$_scrapboxProject/${Uri.encodeComponent(title)}';
+    final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(title);
 
     return scrapboxUrl;
   }
@@ -70,8 +69,7 @@ class SetDiaryPage {
       // webViewContrllerを取得
       final webViewController = ref.watch(webViewControllerProvider);
 
-      final url =
-          'https://scrapbox.io/api/pages/$_scrapboxProject/${Uri.encodeComponent(title)}';
+      final url = scrapboxUrlGenerator.generateApiPageUrl(title);
 
       if (webViewController == null) return false;
 
