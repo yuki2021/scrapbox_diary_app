@@ -102,9 +102,13 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
                 !(url.toString().startsWith(AppConfig.initialUrl) ||
                     url.toString().startsWith('https://accounts.google.com/'))) {
               if (await canLaunchUrl(url)) {
-                controller.stopLoading(); // 読み込みを止める
+                controller.stopLoading();
                 try {
-                  await launchUrl(url); // 外部ブラウザを起動する
+                  await launchUrl(url);
+                  // androidの場合、前のページに戻らないと不具合が発生する
+                  if (Platform.isAndroid) {
+                    controller.goBack();
+                  }
                 } catch (e) {
                   logger.e('Could not launch $url due to the exception: $e');
                 }
