@@ -7,7 +7,6 @@ import 'package:scrapbox_diary_app/provider/page_reload_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/speed_dial_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
-import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'provider/set_diary_page_provider.dart';
@@ -57,12 +56,15 @@ class MyHomePageState extends ConsumerState<MyHomePage>
       return;
     }
 
-    // URLがhttps://scrapbox.io/で始まる時にリロードする
     final url = await webViewController?.getUrl();
 
+    // URLがnullの時はScrapboxのトップページを開く
     if (url == null) {
+      webViewController?.loadUrl(urlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)));
       return;
     }
+
+    // URLがhttps://scrapbox.io/で始まる時以外は何もしない
     if (!url.toString().startsWith(AppConfig.initialUrl)) {
       return;
     }

@@ -7,6 +7,7 @@ import 'package:scrapbox_diary_app/config/logger.dart';
 import 'package:scrapbox_diary_app/provider/loading_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/page_reload_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../config/config.dart';
 
@@ -75,7 +76,7 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
                 .read(webViewControllerProvider.notifier)
                 .setController(controller);
           },
-          onLoadStart: (controller, url) {
+          onLoadStart: (controller, url) async {
             logger.i('onLoadStart: $url');
             // ScrapboxのリダイレクトのURLで5秒以上読み込みが終わらなければ力づくでScrapboxのログイン画面に遷移させる
             if (url
@@ -95,6 +96,23 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
                 }
               });
             }
+
+            // ScrapboxとGoogleログイン以外のURLは全て外部ブラウザで開く
+            if (url != null &&
+                !(url.toString().startsWith(AppConfig.initialUrl) ||
+                    url.toString().startsWith('https://accounts.google.com/'))) {
+              if (await canLaunchUrl(url)) {
+                controller.stopLoading(); // 読み込みを止める
+                try {
+                  await launchUrl(url); // 外部ブラウザを起動する
+                } catch (e) {
+                  logger.e('Could not launch $url due to the exception: $e');
+                }
+              } else {
+                logger.i('Could not launch $url');
+              }
+            }
+
             // ローディング中はtrue
             ref.read(loadingStateProvider.notifier).setLoading(true);
           },
@@ -129,7 +147,14 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
             }
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
-            return NavigationActionPolicy.ALLOW;
+            var uri = navigationAction.request.url!;
+            // ScrapboxとGoogleログイン以外のURLは全て外部ブラウザで開く
+            if (!uri.toString().startsWith(AppConfig.initialUrl) &&
+                !uri.toString().startsWith('https://accounts.google.com/')) { 
+                return NavigationActionPolicy
+                    .CANCEL; // ナビゲーションをキャンセルして外部ブラウザを起動
+            }
+            return NavigationActionPolicy.ALLOW; // それ以外の場合はナビゲーションを許可
           },
           initialUrlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)),
         ),

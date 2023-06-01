@@ -6,7 +6,6 @@ import 'package:scrapbox_diary_app/provider/loading_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/set_diary_page_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/location_service.dart';
-import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
 
 class SpeedDialState extends ConsumerWidget {
   final ProviderRef ref;
