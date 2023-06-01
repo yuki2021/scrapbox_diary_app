@@ -27,7 +27,7 @@ class SetDiaryPage {
   // 今日の日付のページを作成する
   Future<String> setDiaryPage() async {
     DateTime d = DateTime.now();
-    String title = dateUtils.formatDate(d);
+    String date = dateUtils.formatDate(d);
     List<String> tags = [
       dateUtils.generateTag('←', d, diffDays: -1),
       '#${d.year}',
@@ -38,10 +38,10 @@ class SetDiaryPage {
       dateUtils.generateTag('1年前', d, diffYears: -1),
       dateUtils.generateTag('→', d, diffDays: 1),
     ];
-    String body = Uri.encodeComponent(tags.join(' '));
-    String scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(title);
+    String body = tags.join(' ');
+    String scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date, body);
 
-    return '$scrapboxUrl?body=$body';
+    return scrapboxUrl;
   }
 
   // その日の日付を打刻して開く
@@ -49,16 +49,16 @@ class SetDiaryPage {
     final now = DateTime.now();
     final date = dateUtils.formatDate(now);
     final body =
-        Uri.encodeComponent('\t$date ${now.hour}:${now.minute}:${now.second}');
-    final scrapboxUrl = '${scrapboxUrlGenerator.generatePageUrl(date)}?body=$body';
+        '\t$date ${now.hour}:${now.minute}:${now.second}';
+    final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date, body);
 
     return scrapboxUrl;
   }
 
   // データピッカーから渡された日付のページのURLを生成する
   Future<String> setDatePickerPage(DateTime dateObj) async {
-    final title = dateUtils.formatDate(dateObj);
-    final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(title);
+    final date = dateUtils.formatDate(dateObj);
+    final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date);
 
     return scrapboxUrl;
   }

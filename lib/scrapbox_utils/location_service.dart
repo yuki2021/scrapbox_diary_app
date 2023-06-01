@@ -49,12 +49,12 @@ class LocationService {
         final now = DateTime.now();
         final date = dateUtils.formatDate(now);
         // 住所と現在時刻をページに追記
-        final body = Uri.encodeComponent('''
+        final body = '''
 \t$date ${now.hour}:${now.minute}:${now.second}
 \t\t${placemarks.first.name}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}
 \t\t\t[Google Map https://www.google.com/maps/?q=${position.latitude},${position.longitude}]
-''');
-        final scrapboxUrl = '${scrapboxUrlGenerator.generatePageUrl(date)}?body=$body';
+''';
+        final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date, body);
         return scrapboxUrl;
       } else {
         logger.i("No placemark associated with the location");
