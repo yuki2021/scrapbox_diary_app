@@ -6,8 +6,7 @@ import 'package:scrapbox_diary_app/config/logger.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_url.dart';
 
-final setDiaryPageProvider = Provider.family<SetDiaryPage, String>(
-    (ref, currentUrl) => SetDiaryPage(ref, currentUrl));
+
 
 class SetDiaryPage {
   final ProviderRef ref;

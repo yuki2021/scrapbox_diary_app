@@ -64,7 +64,9 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
               javaScriptEnabled: true,
               transparentBackground: true,
               // iosとandroidでUAを変える
-              userAgent: Platform.isIOS ? AppConfig.iOSUserAgent : AppConfig.androidUserAgent,
+              userAgent: Platform.isIOS
+                  ? AppConfig.iOSUserAgent
+                  : AppConfig.androidUserAgent,
             ),
           ),
           pullToRefreshController: pullToRefreshController,
@@ -88,8 +90,8 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
                             .inSeconds >=
                         5) {
                   controller.loadUrl(
-                      urlRequest:
-                          URLRequest(url: Uri.parse('https://scrapbox.io/login/google')));
+                      urlRequest: URLRequest(
+                          url: Uri.parse('https://scrapbox.io/login/google')));
                 }
               });
             }
@@ -133,8 +135,13 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
         ),
         // ローディング中はインジケーターを表示
         if (isLoding)
-          const Center(
-            child: CircularProgressIndicator(),
+          Positioned.fill(
+            child: Container(
+              color: Colors.grey.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
           ),
       ],
     );

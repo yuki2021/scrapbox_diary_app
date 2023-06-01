@@ -10,6 +10,8 @@ import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/set_diary_page.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import 'provider/set_diary_page_provider.dart';
+
 class MyHomePage extends StatefulHookConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
