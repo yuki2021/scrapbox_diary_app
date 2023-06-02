@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:scrapbox_diary_app/my_home_page.dart';
+import 'package:scrapbox_diary_app/screen/my_home_page_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 class MyApp extends StatelessWidget {

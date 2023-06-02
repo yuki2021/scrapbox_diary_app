@@ -8,8 +8,9 @@ import 'package:scrapbox_diary_app/provider/speed_dial_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:scrapbox_diary_app/screen/control_panel_screen.dart';
 
-import 'provider/set_diary_page_provider.dart';
+import '../provider/set_diary_page_provider.dart';
 
 class MyHomePage extends StatefulHookConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -96,6 +97,16 @@ class MyHomePageState extends ConsumerState<MyHomePage>
 
     return Scaffold(
       appBar: AppBar(
+        // 設定画面に遷移する
+        leading: IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TokenInputPage()),
+            );
+          },
+        ),
         actions: [
           IconButton(
             // データピッカーを開いて日付を選択する

@@ -47,12 +47,15 @@ class SetDiaryPage {
   Future<String> setNowTimePage() async {
     final now = DateTime.now();
     final date = dateUtils.formatDate(now);
-    final body =
-        '\t$date ${now.hour}:${now.minute}:${now.second}';
+    final hour = now.hour.toString().padLeft(2, '0');
+    final minute = now.minute.toString().padLeft(2, '0');
+    final second = now.second.toString().padLeft(2, '0');
+    final body = '\t$date $hour:$minute:$second';
     final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date, body);
 
     return scrapboxUrl;
   }
+
 
   // データピッカーから渡された日付のページのURLを生成する
   Future<String> setDatePickerPage(DateTime dateObj) async {
