@@ -56,6 +56,18 @@ class SetDiaryPage {
     return scrapboxUrl;
   }
 
+  // 渡された画像のURLを打刻するAPIを叩いて、その日の日付のページを開く
+  Future<String> setDiaryPageWithImage(String imageUrl) async {
+    final now = DateTime.now();
+    final date = dateUtils.formatDate(now);
+    final hour = now.hour.toString().padLeft(2, '0');
+    final minute = now.minute.toString().padLeft(2, '0');
+    final second = now.second.toString().padLeft(2, '0');
+    final body = '\t$date $hour:$minute:$second\n\t\t[$imageUrl]';
+    final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date, body);
+
+    return scrapboxUrl;
+  }
 
   // データピッカーから渡された日付のページのURLを生成する
   Future<String> setDatePickerPage(DateTime dateObj) async {
