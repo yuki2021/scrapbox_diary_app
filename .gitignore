@@ -67,3 +67,4 @@ lib/firebase_options.dart
 ios/Runner/Info.plist
 AndroidManifest.xml
 gyazo_access_token.dart
+flutter_sdk
