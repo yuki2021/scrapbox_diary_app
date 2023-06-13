@@ -1,8 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:scrapbox_diary_app/image_picker_utils/upload_image_to_gyazo.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class ImageNotifier extends StateNotifier<XFile?> {
   ImageNotifier() : super(null);
@@ -18,5 +21,29 @@ class ImageNotifier extends StateNotifier<XFile?> {
       throw Exception('Failed to pick image');
     }
   }
-}
 
+  Future<List<String>> pickImages(BuildContext context) async {
+    final List<AssetEntity>? assetList = await AssetPicker.pickAssets(
+      context,
+      pickerConfig: const AssetPickerConfig(
+        maxAssets: 5, // Change this as needed
+        pathThumbnailSize: ThumbnailSize(80, 80),
+        gridCount: 4,
+        pageSize: 320,
+        selectedAssets: <AssetEntity>[],
+        themeColor: Colors.green,
+      ),
+    );
+    if (assetList == null) {
+      throw Exception('No images selected');
+    } else {
+      final List<String> imageUrlList = [];
+      for (final asset in assetList) {
+        final File? file = await asset.file;
+        final urlString = await uploadImageToGyazo(file!);
+        imageUrlList.add(urlString);
+      }
+      return imageUrlList;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scrapbox_diary_app/config/logger.dart';
 import 'package:scrapbox_diary_app/provider/imge_file_provider.dart';
 import 'package:scrapbox_diary_app/provider/loading_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/set_diary_page_provider.dart';
@@ -31,24 +32,32 @@ class CameraBottomSheet extends ConsumerWidget {
                   onPressed: () async {
                     // ボトムシートを閉じる
                     Navigator.of(context).pop();
+                    try {
+                      if (webViewController != null) {
+                        // タップされたらローディングを開始
+                        ref.read(loadingStateProvider.notifier).setLoading(true);
 
-                    if (webViewController != null) {
-                      // タップされたらローディングを開始
-                      ref.read(loadingStateProvider.notifier).setLoading(true);
+                        // カメラへアクセスする処理
+                        final imageUrl = await ref
+                            .read(imageNotifierProvider.notifier)
+                            .pickImage();
+                        // 画像URLを整形して返す
+                        final currentUrl =
+                            (await webViewController.getUrl())?.toString() ?? '';
+                        final setDiaryPage =
+                            ref.read(setDiaryPageProvider(currentUrl));
+                        final scrapboxUrl =
+                            await setDiaryPage.setDiaryPageWithImage(imageUrl);
 
-                      // カメラへアクセスする処理
-                      final imageUrl = await ref
-                          .read(imageNotifierProvider.notifier)
-                          .pickImage();
-                      // 画像URLを整形して返す
-                      final currentUrl =
-                          (await webViewController.getUrl())?.toString() ?? '';
-                      final setDiaryPage = ref.read(setDiaryPageProvider(currentUrl));
-                      final scrapboxUrl = await setDiaryPage.setDiaryPageWithImage(imageUrl);
-
-                      // ScrapboxのURLを開く
-                      webViewController.loadUrl(
-                          urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
+                        // ScrapboxのURLを開く
+                        webViewController.loadUrl(
+                            urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
+                      }
+                    } catch (e) {
+                      logger.e(e);
+                    } finally {
+                      // ローディングを終了
+                      ref.read(loadingStateProvider.notifier).setLoading(false);
                     }
                   },
                   style: OutlinedButton.styleFrom(
@@ -71,10 +80,29 @@ class CameraBottomSheet extends ConsumerWidget {
                 ),
               ),
               OutlinedButton(
-                onPressed: () {
-                  // ギャラリーへアクセスする処理
-                  // ref.read(pickImageFromCameraProvider(ImageSource.gallery));
+                onPressed: () async {
                   Navigator.of(context).pop();
+                  try {
+                    if (webViewController != null) {
+                      // ギャラリーへアクセスする処理
+                      final List<String> imageUrlList = await ref
+                          .read(imageNotifierProvider.notifier)
+                          .pickImages(context);
+                      // // 画像URLを整形して返す
+                      // final currentUrl =
+                      //     (await webViewController.getUrl())?.toString() ?? '';
+                      // final setDiaryPage =
+                      //     ref.read(setDiaryPageProvider(currentUrl));
+                      // final scrapboxUrl =
+                      //     await setDiaryPage.setDiaryPageWithImage(imageUrl);
+
+                      // // ScrapboxのURLを開く
+                      // webViewController.loadUrl(
+                      //     urlRequest: URLRequest(url: Uri.parse(scrapboxUrl)));
+                    }
+                  } catch (e) {
+                    logger.e(e);
+                  }
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor:

@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/provider/loading_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/set_diary_page_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
-import 'package:scrapbox_diary_app/scrapbox_utils/location_service.dart';
+import 'package:scrapbox_diary_app/get_location_utils/location_service.dart';
 import 'package:scrapbox_diary_app/widget/camera_bottom_sheet_widget.dart';
 
 class SpeedDialState extends ConsumerWidget {
