@@ -44,7 +44,7 @@ class CameraScreenState extends State<CameraScreen> {
             child: _image == null
                 ? Text(
                     '写真を選択してください',
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   )
                 : Image.file(File(_image!.path))),
         floatingActionButton:

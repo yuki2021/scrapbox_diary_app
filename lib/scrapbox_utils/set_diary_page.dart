@@ -6,8 +6,6 @@ import 'package:scrapbox_diary_app/config/logger.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_url.dart';
 
-
-
 class SetDiaryPage {
   final ProviderRef ref;
   final String _scrapboxProject;
@@ -45,12 +43,8 @@ class SetDiaryPage {
 
   // その日の日付を打刻して開く
   Future<String> setNowTimePage() async {
-    final now = DateTime.now();
-    final date = dateUtils.formatDate(now);
-    final hour = now.hour.toString().padLeft(2, '0');
-    final minute = now.minute.toString().padLeft(2, '0');
-    final second = now.second.toString().padLeft(2, '0');
-    final body = '\t$date $hour:$minute:$second';
+    final date = dateUtils.getCurrentDateFormatted();
+    final body = dateUtils.getCurrentDateTimeFormatted();
     final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date, body);
 
     return scrapboxUrl;
@@ -58,12 +52,18 @@ class SetDiaryPage {
 
   // 渡された画像のURLを打刻するAPIを叩いて、その日の日付のページを開く
   Future<String> setDiaryPageWithImage(String imageUrl) async {
-    final now = DateTime.now();
-    final date = dateUtils.formatDate(now);
-    final hour = now.hour.toString().padLeft(2, '0');
-    final minute = now.minute.toString().padLeft(2, '0');
-    final second = now.second.toString().padLeft(2, '0');
-    final body = '\t$date $hour:$minute:$second\n\t\t[$imageUrl]';
+    final date = dateUtils.getCurrentDateFormatted();
+    final body = '${dateUtils.getCurrentDateTimeFormatted()}\n\t\t[$imageUrl]';
+    final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date, body);
+
+    return scrapboxUrl;
+  }
+
+  // 渡された画像のURLの配列を受け取って、その日の日付のページを開く
+  Future<String> setDiaryPageWithImages(List<String> imageUrls) async {
+    final date = dateUtils.getCurrentDateFormatted();
+    final body =
+        '${dateUtils.getCurrentDateTimeFormatted()}\n\t\t${imageUrls.map((imageUrl) => '[$imageUrl]').join('\n\t\t')}';
     final scrapboxUrl = scrapboxUrlGenerator.generatePageUrl(date, body);
 
     return scrapboxUrl;

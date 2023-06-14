@@ -24,4 +24,20 @@ class DateUtils {
     String projectUrl = '${AppConfig.initialUrl}$_scrapboxProject/';
     return '[$title $projectUrl${Uri.encodeComponent(formatDate(diffDate(date, diffDays, diffMonths: diffMonths, diffYears: diffYears)))}]';
   }
+
+  // 現在の日付をフォーマットして返す
+  String getCurrentDateFormatted() {
+    final now = DateTime.now();
+    return formatDate(now);
+  }
+
+  // 現在時刻をフォーマットして返す
+  String getCurrentDateTimeFormatted() {
+    final now = DateTime.now();
+    final date = formatDate(now);
+    final hour = now.hour.toString().padLeft(2, '0');
+    final minute = now.minute.toString().padLeft(2, '0');
+    final second = now.second.toString().padLeft(2, '0');
+    return '\t$date $hour:$minute:$second';
+  }
 }

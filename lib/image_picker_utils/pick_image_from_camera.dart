@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:scrapbox_diary_app/image_picker_utils/upload_image_to_gyazo.dart';
@@ -40,8 +39,10 @@ class ImageNotifier extends StateNotifier<XFile?> {
       final List<String> imageUrlList = [];
       for (final asset in assetList) {
         final File? file = await asset.file;
-        final urlString = await uploadImageToGyazo(file!);
-        imageUrlList.add(urlString);
+        if (file != null) {
+          final urlString = await uploadImageToGyazo(file);
+          imageUrlList.add(urlString);
+        }
       }
       return imageUrlList;
     }
