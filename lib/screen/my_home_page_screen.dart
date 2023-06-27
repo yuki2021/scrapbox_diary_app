@@ -8,7 +8,7 @@ import 'package:scrapbox_diary_app/provider/speed_dial_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:scrapbox_diary_app/screen/control_panel_screen.dart';
+import 'package:scrapbox_diary_app/screen/gyazo_login_screen.dart';
 
 import '../provider/set_diary_page_provider.dart';
 
@@ -103,7 +103,7 @@ class MyHomePageState extends ConsumerState<MyHomePage>
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const TokenInputPage()),
+              MaterialPageRoute(builder: (context) => const GyazoLoginScreen()),
             );
           },
         ),
