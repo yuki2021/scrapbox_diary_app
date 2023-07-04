@@ -16,32 +16,14 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    // WidgetsBindingを使ってライフサイクルイベントを観察します
-    WidgetsBinding.instance.addObserver(this);
     checkForInitialLink();
+    listenForLinks();
   }
 
   @override
   void dispose() {
     stopListening();
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.resumed:
-        // アプリがフォアグラウンドに戻ったときにリンクリスナーを開始
-        listenForLinks();
-        break;
-      case AppLifecycleState.paused:
-      case AppLifecycleState.inactive:
-      case AppLifecycleState.detached:
-        // アプリがバックグラウンドに移ったときにリンクリスナーを停止
-        stopListening();
-        break;
-    }
   }
 
   @override

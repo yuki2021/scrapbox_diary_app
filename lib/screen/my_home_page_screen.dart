@@ -8,6 +8,7 @@ import 'package:scrapbox_diary_app/provider/speed_dial_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:scrapbox_diary_app/screen/app_lifecycle_manager.dart';
 import 'package:scrapbox_diary_app/screen/gyazo_login_screen.dart';
 
 import '../provider/set_diary_page_provider.dart';
@@ -26,24 +27,17 @@ class MyHomePageState extends ConsumerState<MyHomePage>
   @override
   void initState() {
     super.initState();
-    // アプリがアクティブかどうかを監視する
-    WidgetsBinding.instance.addObserver(this);
+    AppLifecycleManager().onAppResumed = _reloadWebView;
   }
 
   @override
   void dispose() {
-    // アプリがアクティブかどうかを監視するのをやめる
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+    AppLifecycleManager().onAppResumed = null;
   }
 
   //　アプリがアクティブになった時にWebViewをリロードする
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    // アプリがアクティブになった時
-    if (state != AppLifecycleState.resumed) {
-      return;
-    }
+  void _reloadWebView() async {
 
     // webViewControllerがnullの時は何もしない
     if (webViewController == null) {
