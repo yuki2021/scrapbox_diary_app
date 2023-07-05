@@ -7,8 +7,8 @@ import 'package:scrapbox_diary_app/provider/page_reload_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/speed_dial_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/scrapbox_utils/scrapbox_webview.dart';
+import 'package:scrapbox_diary_app/provider/app_lifecycle_provider.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:scrapbox_diary_app/screen/app_lifecycle_manager.dart';
 import 'package:scrapbox_diary_app/screen/gyazo_login_screen.dart';
 
 import '../provider/set_diary_page_provider.dart';
@@ -27,45 +27,52 @@ class MyHomePageState extends ConsumerState<MyHomePage>
   @override
   void initState() {
     super.initState();
-    AppLifecycleManager().onAppResumed = _reloadWebView;
+    
+    ref.read(webViewControllerProvider.notifier).setController(null);
+
+    // 初期状態を設定
+    _handleLifecycleChange(ref.read(appLifecycleStateProvider));
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    AppLifecycleManager().onAppResumed = null;
+  void didUpdateWidget(covariant MyHomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Providerの状態が変わったときにハンドラを呼び出す
+    _handleLifecycleChange(ref.watch(appLifecycleStateProvider));
   }
 
   //　アプリがアクティブになった時にWebViewをリロードする
-  void _reloadWebView() async {
+  void _handleLifecycleChange(AppLifecycleState state) async {
+    if (state != AppLifecycleState.resumed) {
+      return;
+    }
 
-    // webViewControllerがnullの時は何もしない
+    final webViewController = ref.read(webViewControllerProvider);
     if (webViewController == null) {
       return;
     }
 
-    // リロードフラグがtrueの時は何もしない
     final reloadFlag = ref.read(pageReloadStateProvider);
-
     if (reloadFlag) {
       return;
     }
 
-    final url = await webViewController?.getUrl();
-
-    // URLがnullの時はScrapboxのトップページを開く
+    final url = await webViewController.getUrl();
     if (url == null) {
-      webViewController?.loadUrl(urlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)));
+      webViewController.loadUrl(
+          urlRequest: URLRequest(url: Uri.parse(AppConfig.initialUrl)));
       return;
     }
 
-    // URLがhttps://scrapbox.io/で始まる時以外は何もしない
     if (!url.toString().startsWith(AppConfig.initialUrl)) {
       return;
     }
 
-    webViewController?.reload();
+    webViewController.reload();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
