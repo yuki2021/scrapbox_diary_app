@@ -14,12 +14,15 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
-  
+
+  // DeepLinkManager
+  final DeepLinkManager _deepLinkManager = DeepLinkManager();
+
   @override
   void initState() {
     super.initState();
-    checkForInitialLink();
-    listenForLinks();
+    // DeepLinkの初期化
+    _deepLinkManager.init();
 
     // アプリのライフサイクル状態を監視するためにNotifierを登録
     WidgetsBinding.instance
@@ -28,7 +31,8 @@ class MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    stopListening();
+    // DeepLinkManagerの破棄
+    _deepLinkManager.dispose();
 
     // アプリのライフサイクル状態を監視するNotifierを削除
     WidgetsBinding.instance
