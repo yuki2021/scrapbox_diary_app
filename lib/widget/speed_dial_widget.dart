@@ -6,6 +6,8 @@ import 'package:scrapbox_diary_app/provider/loading_state_provider.dart';
 import 'package:scrapbox_diary_app/provider/set_diary_page_provider.dart';
 import 'package:scrapbox_diary_app/provider/webview_controller_provider.dart';
 import 'package:scrapbox_diary_app/get_location_utils/location_service.dart';
+import 'package:scrapbox_diary_app/screen/gyazo_login_screen.dart';
+import 'package:scrapbox_diary_app/secure_storage_utils/secure_strage_controller.dart';
 import 'package:scrapbox_diary_app/widget/camera_bottom_sheet_widget.dart';
 
 class SpeedDialState extends ConsumerWidget {
@@ -70,11 +72,46 @@ class SpeedDialState extends ConsumerWidget {
             foregroundColor: Colors.white,
             child: const Icon(Icons.camera_alt),
             label: '写真撮影',
-            onTap: () {
-              const CameraBottomSheet().showCameraBottomSheet(context, ref);
-            }            
-            ),
+            onTap: () async {
+              final tokenExists = await ref
+                  .read(secureStorageProvider.notifier)
+                  .tokenExists('gyazo_token');
+              if (tokenExists) {
+                const CameraBottomSheet().showCameraBottomSheet(context, ref);
+              } else {
+                showImagePickerDialog(context);
+              }
+            }),
       ],
+    );
+  }
+
+  Future<dynamic> showImagePickerDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Gyazoログイン'),
+        content: const Text('この機能を使うにはGyazoへのログインが必要です。ログインしますか？'),
+        actions: [
+          TextButton(
+            child: const Text('キャンセル'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('ログイン'),
+            onPressed: () {
+              // Gyazoログインページにリダイレクトする処理をここに書く
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const GyazoLoginScreen()),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

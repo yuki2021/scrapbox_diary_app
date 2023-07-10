@@ -1,31 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:oauth2/oauth2.dart' as oauth2;
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/config/gyazo_access_token.dart';
+import 'package:scrapbox_diary_app/secure_storage_utils/secure_strage_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const String authorizationEndpoint = 'https://api.gyazo.com/oauth/authorize';
 const String tokenEndpoint = 'https://api.gyazo.com/oauth/token';
 
-class GyazoLoginScreen extends StatelessWidget {
+class GyazoLoginScreen extends ConsumerWidget {
   const GyazoLoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tokenExists =
+        ref.read(secureStorageProvider.notifier).tokenExists('gyazo_token');
+
     return MaterialApp(
-      title: 'Gyazo Login Demo',
+      title: 'Gyazoログイン',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
       ),
+      darkTheme: ThemeData.dark(),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Gyazo Login Demo'),
+          title: const Text('Gyazo Login'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
         body: Center(
-          child: ElevatedButton(
-            onPressed: () async {
-              await getGyazoAccessToken(context);
+          child: FutureBuilder<bool>(
+            future: tokenExists,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.data == true) {
+                  return ElevatedButton(
+                    onPressed: () async {
+                      await ref
+                          .read(secureStorageProvider.notifier)
+                          .deleteToken('gyazo_token');
+                    },
+                    child: const Text('Gyazoからログアウト'),
+                  );
+                } else {
+                  return ElevatedButton(
+                    onPressed: () async {
+                      await getGyazoAccessToken(context);
+                    },
+                    child: const Text('Gyazoにログイン'),
+                  );
+                }
+              } else {
+                return const CircularProgressIndicator();
+              }
             },
-            child: const Text('Login with Gyazo'),
           ),
         ),
       ),
@@ -47,7 +77,6 @@ class GyazoLoginScreen extends StatelessWidget {
     final Uri url = Uri.parse(authorizationUrl.toString());
     if (await canLaunchUrl(url)) {
       await launchUrl(
-        // アプリのデフォルトブラウザでGyazoの認証ページを開きます
         url,
         mode: LaunchMode.externalApplication,
       );

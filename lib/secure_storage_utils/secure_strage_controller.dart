@@ -23,6 +23,12 @@ class SecureStorageController extends StateNotifier<FlutterSecureStorage> {
   Future<void> deleteAllTokens() async {
     await state.deleteAll();
   }
+
+  // セキュアストレージにトークンが存在するか確認するメソッド
+  Future<bool> tokenExists(String key) async {
+    final token = await state.read(key: key);
+    return token != null && token.isNotEmpty;
+  }
 }
 
 final secureStorageProvider =
