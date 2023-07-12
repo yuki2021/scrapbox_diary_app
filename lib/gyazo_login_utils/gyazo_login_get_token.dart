@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/config/logger.dart';
+import 'package:scrapbox_diary_app/provider/gyazo_token_provider.dart';
 import 'package:scrapbox_diary_app/secure_storage_utils/secure_strage_controller.dart';
 import 'package:uni_links/uni_links.dart';
-
 
 class DeepLinkManager {
   StreamSubscription? _sub;

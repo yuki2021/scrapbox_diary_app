@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oauth2/oauth2.dart' as oauth2;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/config/gyazo_access_token.dart';
+import 'package:scrapbox_diary_app/provider/gyazo_token_provider.dart';
 import 'package:scrapbox_diary_app/secure_storage_utils/secure_strage_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -13,8 +14,8 @@ class GyazoLoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tokenExists =
-        ref.read(secureStorageProvider.notifier).tokenExists('gyazo_token');
+    final gyazoToken = ref.watch(gyazoTokenProvider);
+    final gyazoTokenNotifier = ref.watch(gyazoTokenProvider.notifier);
 
     return MaterialApp(
       title: 'Gyazoログイン',
@@ -31,32 +32,19 @@ class GyazoLoginScreen extends ConsumerWidget {
           ),
         ),
         body: Center(
-          child: FutureBuilder<bool>(
-            future: tokenExists,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.data == true) {
-                  return ElevatedButton(
-                    onPressed: () async {
-                      await ref
-                          .read(secureStorageProvider.notifier)
-                          .deleteToken('gyazo_token');
-                    },
-                    child: const Text('Gyazoからログアウト'),
-                  );
-                } else {
-                  return ElevatedButton(
-                    onPressed: () async {
-                      await getGyazoAccessToken(context);
-                    },
-                    child: const Text('Gyazoにログイン'),
-                  );
-                }
-              } else {
-                return const CircularProgressIndicator();
-              }
-            },
-          ),
+          child: gyazoToken.gyazoToken.isNotEmpty
+              ? ElevatedButton(
+                  onPressed: () async {
+                    await gyazoTokenNotifier.deleteToken();
+                  },
+                  child: const Text('Gyazoからログアウト'),
+                )
+              : ElevatedButton(
+                  onPressed: () async {
+                    await getGyazoAccessToken(context);
+                  },
+                  child: const Text('Gyazoにログイン'),
+                ),
         ),
       ),
     );
