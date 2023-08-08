@@ -63,6 +63,7 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
           initialOptions: InAppWebViewGroupOptions(
             crossPlatform: InAppWebViewOptions(
               javaScriptEnabled: true,
+              javaScriptCanOpenWindowsAutomatically: true,
               transparentBackground: true,
               // iosとandroidでUAを変える
               userAgent: Platform.isIOS
@@ -100,7 +101,8 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
             // ScrapboxとGoogleログイン以外のURLは全て外部ブラウザで開く
             if (url != null &&
                 !(url.toString().startsWith(AppConfig.initialUrl) ||
-                    url.toString().startsWith('https://accounts.google.com/'))) {
+                    url.toString().startsWith('https://accounts.google.com/') ||
+                    url.toString().startsWith('https://gyazo.com/'))) {
               if (await canLaunchUrl(url)) {
                 controller.stopLoading();
                 try {
@@ -154,9 +156,8 @@ class ShowScrapboxWebViewState extends ConsumerState<ShowScrapboxWebView> {
             var uri = navigationAction.request.url!;
             // ScrapboxとGoogleログイン以外のURLは全て外部ブラウザで開く
             if (!uri.toString().startsWith(AppConfig.initialUrl) &&
-                !uri.toString().startsWith('https://accounts.google.com/')) { 
-                return NavigationActionPolicy
-                    .CANCEL; // ナビゲーションをキャンセルして外部ブラウザを起動
+                !uri.toString().startsWith('https://accounts.google.com/')) {
+              return NavigationActionPolicy.CANCEL; // ナビゲーションをキャンセルして外部ブラウザを起動
             }
             return NavigationActionPolicy.ALLOW; // それ以外の場合はナビゲーションを許可
           },
