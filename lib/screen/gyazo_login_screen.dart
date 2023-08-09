@@ -3,7 +3,6 @@ import 'package:oauth2/oauth2.dart' as oauth2;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/config/gyazo_access_token.dart';
 import 'package:scrapbox_diary_app/provider/gyazo_token_provider.dart';
-import 'package:scrapbox_diary_app/secure_storage_utils/secure_strage_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const String authorizationEndpoint = 'https://api.gyazo.com/oauth/authorize';
