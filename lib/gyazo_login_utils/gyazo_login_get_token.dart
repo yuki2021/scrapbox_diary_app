@@ -86,7 +86,7 @@ class DeepLinkManager {
   // fetchAccessTokenメソッドは与えられた認証コードからアクセストークンを取得します。
   Future<String> fetchAccessToken(String authCode) async {
     final response = await http.post(
-      Uri.parse('https://api.gyazo.com/oauth/token'),
+      Uri.parse(GyazoAccessToken.tokenEndpoint),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },

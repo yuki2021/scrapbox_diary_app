@@ -4,8 +4,6 @@ import 'package:scrapbox_diary_app/config/gyazo_access_token.dart';
 import 'package:scrapbox_diary_app/provider/gyazo_token_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const String authorizationEndpoint = 'https://api.gyazo.com/oauth/authorize';
-
 class GyazoLoginScreen extends ConsumerWidget {
   const GyazoLoginScreen({super.key});
 
@@ -48,6 +46,7 @@ class GyazoLoginScreen extends ConsumerWidget {
   }
 
   Future<void> openGyazoAuthPage(BuildContext context) async {
+    const String authorizationEndpoint = GyazoAccessToken.authorizationEndpoint;
     const String clientId = GyazoAccessToken.clientId;
     const String redirectUrl = GyazoAccessToken.redirectUrl;
 

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
+import 'package:scrapbox_diary_app/config/gyazo_access_token.dart';
 import 'package:scrapbox_diary_app/secure_storage_utils/secure_strage_controller.dart';
 
 import '../config/logger.dart';
@@ -19,12 +20,11 @@ Future<String> uploadImageToGyazo(File imageFile, Ref ref) async {
   logger.i(gyazoToken);
     
   // Gyazoのアップロードエンドポイント
-  var uri = Uri.parse("https://upload.gyazo.com/api/upload");
+  var uri = Uri.parse(GyazoAccessToken.uploadUrl);
 
   // multipartリクエストを作成
   var request = http.MultipartRequest('POST', uri)
     ..fields['access_token'] = gyazoToken // アクセストークン
-    //..fields['access_token'] = GyazoAccessToken.token // アクセストークン
     ..files.add(await http.MultipartFile.fromPath(
       'imagedata',
       imageFile.path,
