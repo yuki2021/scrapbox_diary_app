@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scrapbox_diary_app/config/gyazo_access_token.dart';
 import 'package:scrapbox_diary_app/config/logger.dart';
 import 'package:scrapbox_diary_app/secure_storage_utils/secure_strage_controller.dart';
 import 'package:uni_links/uni_links.dart';
+import 'package:http/http.dart' as http;
 
 class DeepLinkManager {
   StreamSubscription? _sub;
@@ -48,16 +51,14 @@ class DeepLinkManager {
     _sub = linkStream.listen((String? link) async {
       logger.i('Link: $link');
       if (link != null) {
-        final token = extractAccessTokenFromUrl(link);
-        logger.i('Token: $token');
+        final authCode = extractAccessTokenFromUrl(link);
+        logger.i('auth code: $authCode');
+        // アクセストークンを取得
+        final accessToken = await fetchAccessToken(authCode);
+        logger.i('access token: $accessToken');
         await container
             ?.read(secureStorageProvider.notifier)
-            .writeToken('gyazo_token', token);
-        // セキュアストレージに保存されてるか確認
-        // final token2 = await container
-        //     ?.read(secureStorageProvider.notifier)
-        //     .readToken('gyazo_token');
-        // logger.i('Token2: $token2');
+            .writeToken('gyazo_token', accessToken);
       }
     }, onError: (err) {
       logger.e('listenForLinks err: $err');
@@ -80,5 +81,34 @@ class DeepLinkManager {
       throw Exception('No token found in the URL.');
     }
     return token;
+  }
+
+  // fetchAccessTokenメソッドは与えられた認証コードからアクセストークンを取得します。
+  Future<String> fetchAccessToken(String authCode) async {
+    final response = await http.post(
+      Uri.parse('https://api.gyazo.com/oauth/token'),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'client_id': GyazoAccessToken.clientId,
+        'client_secret': GyazoAccessToken.clientSecret,
+        'code': authCode,
+        'redirect_uri': GyazoAccessToken.redirectUrl,
+        'grant_type': 'authorization_code',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      final accessToken = responseBody['access_token'];
+      if (accessToken != null) {
+        return accessToken;
+      } else {
+        throw Exception('Access token not found in the response.');
+      }
+    } else {
+      throw Exception('Failed to fetch access token.');
+    }
   }
 }

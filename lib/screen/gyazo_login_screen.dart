@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:oauth2/oauth2.dart' as oauth2;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrapbox_diary_app/config/gyazo_access_token.dart';
 import 'package:scrapbox_diary_app/provider/gyazo_token_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const String authorizationEndpoint = 'https://api.gyazo.com/oauth/authorize';
-const String tokenEndpoint = 'https://api.gyazo.com/oauth/token';
 
 class GyazoLoginScreen extends ConsumerWidget {
   const GyazoLoginScreen({super.key});
@@ -40,7 +38,7 @@ class GyazoLoginScreen extends ConsumerWidget {
                 )
               : ElevatedButton(
                   onPressed: () async {
-                    await getGyazoAccessToken(context);
+                    await openGyazoAuthPage(context);
                   },
                   child: const Text('Gyazoにログイン'),
                 ),
@@ -49,19 +47,14 @@ class GyazoLoginScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> getGyazoAccessToken(BuildContext context) async {
-    final redirectUri = Uri.parse(GyazoAccessToken.redirectUrl);
-    final oauth2.AuthorizationCodeGrant grant = oauth2.AuthorizationCodeGrant(
-      GyazoAccessToken.clientId,
-      Uri.parse(authorizationEndpoint),
-      Uri.parse(tokenEndpoint),
-      secret: GyazoAccessToken.clientSecret,
-    );
-    final authorizationUrl = grant.getAuthorizationUrl(
-      redirectUri,
-      scopes: <String>['public'],
-    );
-    final Uri url = Uri.parse(authorizationUrl.toString());
+  Future<void> openGyazoAuthPage(BuildContext context) async {
+    const String clientId = GyazoAccessToken.clientId;
+    const String redirectUrl = GyazoAccessToken.redirectUrl;
+
+    const String authorizationUrl =
+        '$authorizationEndpoint?client_id=$clientId&redirect_uri=$redirectUrl&response_type=code';
+
+    final Uri url = Uri.parse(authorizationUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(
         url,
